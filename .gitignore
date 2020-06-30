@@ -1,3 +1,13 @@
+# Executables
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -13,3 +23,4 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
