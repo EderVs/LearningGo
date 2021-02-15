@@ -26,3 +26,6 @@
 
 # DS_Store
 .DS_Store
+
+# Visual Studio
+*.code-workspace
