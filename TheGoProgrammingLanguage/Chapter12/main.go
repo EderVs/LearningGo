@@ -8,6 +8,9 @@ type Movie struct {
 	Actor           map[string]string
 	Oscars          []string
 	Sequel          *string
+	Example         map[struct{ E string }]string
+	ExampleArray    map[[2]string]string
+	OtherMovie      *Movie
 }
 
 func main() {
@@ -30,6 +33,9 @@ func main() {
 			"Best Director (Nomin.)",
 			"Best Picture (Nomin.)",
 		},
+		Example:      map[struct{ E string }]string{{E: "hello"}: "world"},
+		ExampleArray: map[[2]string]string{{"hello", "hello2"}: "world"},
 	}
+	strangelove.OtherMovie = &strangelove
 	Display("strangeLove", strangelove)
 }

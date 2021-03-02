@@ -3,6 +3,7 @@ package main
 import (
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func formatAtom(v reflect.Value) string {
@@ -23,7 +24,27 @@ func formatAtom(v reflect.Value) string {
 	case reflect.Chan, reflect.Func, reflect.Ptr, reflect.Slice, reflect.Map:
 		return v.Type().String() + " 0x" +
 			strconv.FormatUint(uint64(v.Pointer()), 16)
-	default: // reflect.Array, reflect.Struct, reflect.Interface
+	case reflect.Struct:
+		var structS strings.Builder
+		structS.WriteString("{ ")
+		for i := 0; i < v.NumField(); i++ {
+			structS.WriteString(v.Type().Field(i).Name)
+			structS.WriteString(": ")
+			structS.WriteString(formatAtom(v.Field(i)))
+			structS.WriteString(", ")
+		}
+		structS.WriteString("}")
+		return structS.String()
+	case reflect.Array:
+		var structS strings.Builder
+		structS.WriteString("[ ")
+		for i := 0; i < v.Len(); i++ {
+			structS.WriteString(formatAtom(v.Index(i)))
+			structS.WriteString(", ")
+		}
+		structS.WriteString("]")
+		return structS.String()
+	default: // reflect.Interface
 		return v.Type().String() + " value"
 	}
 }
