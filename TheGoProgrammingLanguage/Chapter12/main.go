@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // Movie contains information of a movie.
 type Movie struct {
 	Title, Subtitle string
@@ -36,6 +38,11 @@ func main() {
 		Example:      map[struct{ E string }]string{{E: "hello"}: "world"},
 		ExampleArray: map[[2]string]string{{"hello", "hello2"}: "world"},
 	}
-	strangelove.OtherMovie = &strangelove
+	//strangelove.OtherMovie = &strangelove
 	Display("strangeLove", strangelove)
+	b, err := Marshal(strangelove)
+	if err != nil {
+		fmt.Printf("there was an error in Marshal(%v): %v\n", strangelove, err)
+	}
+	fmt.Printf("%v\n", string(b))
 }
