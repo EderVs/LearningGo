@@ -13,6 +13,7 @@ type Movie struct {
 	Example         map[struct{ E string }]string
 	ExampleArray    map[[2]string]string
 	OtherMovie      *Movie
+	MapArray        map[string][]string
 }
 
 func main() {
@@ -37,10 +38,35 @@ func main() {
 		},
 		Example:      map[struct{ E string }]string{{E: "hello"}: "world"},
 		ExampleArray: map[[2]string]string{{"hello", "hello2"}: "world"},
+		MapArray:     map[string][]string{"hello": {"world", "world", "world"}},
+	}
+	strangelove2 := Movie{
+		Title:    "Dr. Strangelove2",
+		Subtitle: "How I learned to Stop Worrying and Love the Bomb",
+		Year:     1964,
+		Color:    false,
+		Actor: map[string]string{
+			"Dr. Strangelove":            "Peter Sellers",
+			"Grp. Capt. Lionel Mandrake": "Peter Sellers",
+			"Pres. Merkin Muffley":       "Peter Sellers",
+			"Gen. Buck Turgidson":        "Geroge C. Scoot",
+			"Brig. Gen. Jack D. Ripper":  "Sterling Hayden",
+			`Maj. T.J. "King" Kong`:      "Slim Pickens",
+		},
+		Oscars: []string{
+			"Best Actor (Nomin.)",
+			"Best Adapted Screenplay (Nomin.)",
+			"Best Director (Nomin.)",
+			"Best Picture (Nomin.)",
+		},
+		Example:      map[struct{ E string }]string{{E: "hello"}: "world"},
+		ExampleArray: map[[2]string]string{{"hello", "hello2"}: "world"},
+		OtherMovie:   &strangelove,
+		MapArray:     map[string][]string{"hello": {"world", "world", "world"}},
 	}
 	//strangelove.OtherMovie = &strangelove
-	Display("strangeLove", strangelove)
-	b, err := Marshal(strangelove)
+	// Display("strangeLove", strangelove)
+	b, err := Marshal(strangelove2)
 	if err != nil {
 		fmt.Printf("there was an error in Marshal(%v): %v\n", strangelove, err)
 	}

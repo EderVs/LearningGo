@@ -9,13 +9,13 @@ import (
 // Marshal encodes a Go value in S-expression form.
 func Marshal(v interface{}) ([]byte, error) {
 	var buf bytes.Buffer
-	if err := encode(&buf, reflect.ValueOf(v)); err != nil {
+	if err := encode(&buf, reflect.ValueOf(v), 0); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
-func encode(buf *bytes.Buffer, v reflect.Value) error {
+func encode(buf *bytes.Buffer, v reflect.Value, spaces int) error {
 	switch v.Kind() {
 	case reflect.Invalid:
 		buf.WriteString("nil")
@@ -35,18 +35,21 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 		fmt.Fprintf(buf, "%q", v.String())
 
 	case reflect.Ptr:
-		return encode(buf, v.Elem())
+		return encode(buf, v.Elem(), spaces)
 
 	case reflect.Array, reflect.Slice: // (value ...)
 		buf.WriteByte('(')
 		for i := 0; i < v.Len(); i++ {
 			if i > 0 {
-				buf.WriteByte(' ')
+				writeNSpaces(buf, spaces+1)
 			}
-			if err := encode(buf, v.Index(i)); err != nil {
+			if err := encode(buf, v.Index(i), spaces+1); err != nil {
 				return err
 			}
-			buf.WriteByte(')')
+			buf.WriteString("\n")
+		}
+		if v.Len() > 0 {
+			writeNSpaces(buf, spaces)
 		}
 		buf.WriteByte(')')
 
@@ -54,36 +57,48 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 		buf.WriteByte('(')
 		for i := 0; i < v.NumField(); i++ {
 			if i > 0 {
-				buf.WriteByte(' ')
+				writeNSpaces(buf, spaces+1)
 			}
 			fmt.Fprintf(buf, "(%s ", v.Type().Field(i).Name)
-			if err := encode(buf, v.Field(i)); err != nil {
+			if err := encode(buf, v.Field(i), spaces+1+1+len(v.Type().Field(i).Name)+1); err != nil {
 				return err
 			}
-			buf.WriteByte(')')
+			buf.WriteString(")\n")
 		}
-		buf.WriteByte(')')
+		if v.NumField() > 0 {
+			writeNSpaces(buf, spaces)
+		}
+		buf.WriteString(")")
 
 	case reflect.Map: // ((key value) ...)
 		buf.WriteByte('(')
 		for i, key := range v.MapKeys() {
 			if i > 0 {
-				buf.WriteByte(' ')
+				writeNSpaces(buf, spaces+1)
 			}
 			buf.WriteByte('(')
-			if err := encode(buf, key); err != nil {
+			if err := encode(buf, key, spaces+1+1); err != nil {
 				return err
 			}
 			buf.WriteByte(' ')
-			if err := encode(buf, v.MapIndex(key)); err != nil {
+			if err := encode(buf, v.MapIndex(key), spaces+1+len(key.String())+1+3); err != nil {
 				return err
 			}
-			buf.WriteByte(')')
+			buf.WriteString(")\n")
 		}
-		buf.WriteByte(')')
+		if len(v.MapKeys()) > 0 {
+			writeNSpaces(buf, spaces)
+		}
+		buf.WriteString(")")
 
 	default: // float, complex, bool, chan, func, interface
 		return fmt.Errorf("unsopported type: %s", v.Type())
 	}
 	return nil
+}
+
+func writeNSpaces(buf *bytes.Buffer, spaces int) {
+	for space := 0; space < spaces; space++ {
+		buf.WriteByte(' ')
+	}
 }
